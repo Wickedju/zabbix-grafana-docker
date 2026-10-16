@@ -89,3 +89,11 @@ docker compose down -v     # remove também os volumes (apaga os dados)
 - [ ] Criar gatilhos e alertas por e-mail ou Telegram
 - [ ] Provisionar a fonte de dados e os dashboards do Grafana via arquivos
 - [ ] Monitorar a instância EC2 do projeto de Terraform
+
+## Resultados
+
+Aqui estão as evidências da simulação do incidente (Deteção e Resolução):
+
+![Incidente Detectado no Zabbix](docs/problem.png)
+
+![Incidente Resolvido](docs/resolved.png)
