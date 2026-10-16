@@ -1,0 +1,6 @@
+# Copie este arquivo para .env e troque as senhas.
+# O .env está no .gitignore e NÃO deve ser commitado.
+
+ZABBIX_DB_PASSWORD=troque-esta-senha-do-banco
+MYSQL_ROOT_PASSWORD=troque-esta-senha-root
+GRAFANA_ADMIN_PASSWORD=troque-esta-senha-do-grafana
