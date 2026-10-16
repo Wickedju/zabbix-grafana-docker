@@ -1,0 +1,103 @@
+# Stack de monitoramento: Zabbix (servidor + web + agente) + MySQL + Grafana
+# Documentação: ver README.md
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: zbx-mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_bin
+      - --skip-log-bin
+    environment:
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: ${ZABBIX_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - monitoramento
+
+  zabbix-server:
+    image: zabbix/zabbix-server-mysql:alpine-7.0-latest
+    container_name: zbx-server
+    environment:
+      DB_SERVER_HOST: mysql
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: ${ZABBIX_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "10051:10051"
+    restart: unless-stopped
+    networks:
+      - monitoramento
+
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-mysql:alpine-7.0-latest
+    container_name: zbx-web
+    environment:
+      ZBX_SERVER_HOST: zabbix-server
+      DB_SERVER_HOST: mysql
+      MYSQL_DATABASE: zabbix
+      MYSQL_USER: zabbix
+      MYSQL_PASSWORD: ${ZABBIX_DB_PASSWORD}
+      PHP_TZ: America/Sao_Paulo
+    depends_on:
+      mysql:
+        condition: service_healthy
+      zabbix-server:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - monitoramento
+
+  zabbix-agent:
+    image: zabbix/zabbix-agent:alpine-7.0-latest
+    container_name: zbx-agent
+    environment:
+      ZBX_HOSTNAME: "Zabbix server"
+      ZBX_SERVER_HOST: zabbix-server
+    depends_on:
+      - zabbix-server
+    restart: unless-stopped
+    networks:
+      - monitoramento
+
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_INSTALL_PLUGINS: alexanderzobnin-zabbix-app
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - zabbix-web
+    restart: unless-stopped
+    networks:
+      - monitoramento
+
+volumes:
+  mysql-data:
+  grafana-data:
+
+networks:
+  monitoramento:
+    driver: bridge
