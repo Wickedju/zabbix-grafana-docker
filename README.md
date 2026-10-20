@@ -92,7 +92,7 @@ docker compose down -v     # remove também os volumes (apaga os dados)
 
 ## Resultados
 
-Aqui estão as evidências da simulação do incidente (Deteção e Resolução):
+Aqui estão as evidências da simulação do incidente (detecção e resolução):
 
 ![Incidente Detectado no Zabbix](docs/problem.png)
 
