@@ -83,6 +83,17 @@ docker compose down        # para e remove os containers (mantém os dados)
 docker compose down -v     # remove também os volumes (apaga os dados)
 ```
 
+
+## Solução de problemas
+
+**Erro "React error #130" ao configurar o plugin do Zabbix no Grafana**
+Causa: incompatibilidade entre a versão do plugin e a do Grafana.
+Solução: atualizar a imagem do Grafana e fixar as versões do Grafana e do plugin no `docker-compose.yml`.
+
+**Indicador ZBX vermelho no host "Zabbix server"**
+Causa: o host aponta para `127.0.0.1`, mas o agente roda em outro container.
+Solução: configurar a interface por DNS, com o nome `zabbix-agent`, porta `10050`.
+
 ## Próximos passos
 
 - [ ] Adicionar um segundo host monitorado (por exemplo, uma VM Linux)
